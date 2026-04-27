@@ -1,4 +1,6 @@
-import { useParams, Link } from "react-router";
+"use client";
+
+import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Copy, Check } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -247,8 +249,7 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
   );
 }
 
-export function BlogDetailPage() {
-  const { id } = useParams();
+export function BlogDetailPage({ id }: { id: string }) {
   const post = blogPostsData.find(p => p.id === id);
 
   if (!post) {
@@ -256,7 +257,7 @@ export function BlogDetailPage() {
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="text-center">
           <h1 className="text-4xl mb-4 text-white" style={{ fontWeight: 700 }}>Post Not Found</h1>
-          <Link to="/#blog" className="text-purple-500 hover:text-purple-400">
+          <Link href="/#blog" className="text-purple-500 hover:text-purple-400">
             ← Back to Blog
           </Link>
         </div>
@@ -269,7 +270,7 @@ export function BlogDetailPage() {
       <div className="max-w-[800px] mx-auto">
         {/* Back Button */}
         <Link
-          to="/#blog"
+          href="/#blog"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={20} />
@@ -323,6 +324,9 @@ export function BlogDetailPage() {
               );
             }
             if (block.type === 'code') {
+              if (!block.code || !block.language) {
+                return null;
+              }
               return (
                 <CodeBlock
                   key={index}

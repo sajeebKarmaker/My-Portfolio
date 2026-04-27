@@ -1,4 +1,6 @@
-import { useParams, Link } from "react-router";
+"use client";
+
+import Link from "next/link";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 
 const projectsData = [
@@ -61,8 +63,7 @@ const projectsData = [
   }
 ];
 
-export function ProjectDetailPage() {
-  const { id } = useParams();
+export function ProjectDetailPage({ id }: { id: string }) {
   const project = projectsData.find(p => p.id === id);
 
   if (!project) {
@@ -70,7 +71,7 @@ export function ProjectDetailPage() {
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="text-center">
           <h1 className="text-4xl mb-4 text-white" style={{ fontWeight: 700 }}>Project Not Found</h1>
-          <Link to="/" className="text-purple-500 hover:text-purple-400">
+          <Link href="/" className="text-purple-500 hover:text-purple-400">
             ← Back to Home
           </Link>
         </div>
@@ -83,7 +84,7 @@ export function ProjectDetailPage() {
       <div className="max-w-[1200px] mx-auto">
         {/* Back Button */}
         <Link
-          to="/"
+          href="/"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={20} />

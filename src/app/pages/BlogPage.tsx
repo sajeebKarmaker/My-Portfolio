@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import Link from "next/link";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 
 const blogPosts = [
@@ -50,7 +50,7 @@ export function BlogPage() {
           {blogPosts.map((post) => (
             <Link
               key={post.id}
-              to={`/blog/${post.id}`}
+              href={`/blog/${post.id}`}
               className="group bg-[#12121a] rounded-2xl overflow-hidden border border-gray-800 hover:border-purple-500/50 transition-all"
             >
               <div className="h-48 overflow-hidden">

@@ -1,12 +1,15 @@
+"use client";
+
 import { Menu, Moon, Sun } from "lucide-react";
 import { useState } from "react";
-import { Link, useLocation } from "react-router";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTheme } from "../context/ThemeContext";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
-  const isHomePage = location.pathname === "/";
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
   const { theme, toggleTheme } = useTheme();
 
   const navItems = [
@@ -23,7 +26,7 @@ export function Header() {
         {/* Desktop Navigation - All in one rounded container */}
         <div className="hidden md:flex items-center gap-4 px-4 py-2 border border-border rounded-full bg-card/50 backdrop-blur-sm">
           {/* Logo */}
-          <Link to="/" className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-yellow-600 flex items-center justify-center flex-shrink-0">
+          <Link href="/" className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-yellow-600 flex items-center justify-center flex-shrink-0">
             <span className="text-white text-lg" style={{ fontWeight: 700 }}>A</span>
           </Link>
 

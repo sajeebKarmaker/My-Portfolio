@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { Link } from "react-router";
+import Link from "next/link";
 
 export function Projects() {
   const projects = [
@@ -46,7 +46,7 @@ export function Projects() {
           {projects.map((project, index) => (
             <Link
               key={index}
-              to={`/project/${project.id}`}
+              href={`/project/${project.id}`}
               className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-purple-500/50 transition-all cursor-pointer"
             >
               <div className="h-48 overflow-hidden">
