@@ -3,14 +3,14 @@ export function About() {
     <section id="about" className="py-20 px-6 md:px-12 lg:px-20">
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl mb-6 text-white" style={{ fontWeight: 700 }}>
-            I develop{" "}
+          <h2 className="text-4xl md:text-5xl mb-6 text-foreground" style={{ fontWeight: 700 }}>
+            I build{" "}
             <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
-              frontend
+              full stack
             </span>{" "}
             solutions that delight and inspire users.
           </h2>
-          <button className="px-8 py-3 bg-white text-black rounded-full hover:bg-gray-200 transition-colors" style={{ fontWeight: 700 }}>
+          <button className="px-8 py-3 bg-foreground text-background rounded-full hover:bg-foreground/90 transition-colors" style={{ fontWeight: 700 }}>
             Hire me
           </button>
         </div>

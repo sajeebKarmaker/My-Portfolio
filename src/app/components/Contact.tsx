@@ -5,17 +5,17 @@ export function Contact() {
     {
       icon: Mail,
       label: "Email",
-      value: "ayoola@example.com"
+      value: "sjbkarmaker@gmail.com"
     },
     {
       icon: Phone,
       label: "Phone",
-      value: "+1 (555) 123-4567"
+      value: "+880 1704 617743"
     },
     {
       icon: MapPin,
       label: "Location",
-      value: "San Francisco, CA"
+      value: "Dhaka, Bangladesh"
     }
   ];
 

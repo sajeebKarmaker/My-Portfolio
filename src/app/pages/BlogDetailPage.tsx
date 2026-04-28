@@ -1,214 +1,82 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Calendar, Clock, Copy, Check } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Copy, Check, BookOpen } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
+import { blogPosts } from "../data/blogPosts";
 
-const blogPostsData = [
-  {
-    id: "react-best-practices-2026",
-    title: "React Best Practices for 2026",
-    date: "April 20, 2026",
-    readTime: "8 min read",
-    category: "React",
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800",
-    content: [
-      {
-        type: "paragraph",
-        text: "React continues to evolve, and with it, the best practices for building scalable applications. In this article, we'll explore the latest patterns and techniques that will help you write better React code in 2026."
-      },
-      {
-        type: "heading",
-        text: "1. Use Server Components When Possible"
-      },
-      {
-        type: "paragraph",
-        text: "Server Components allow you to render components on the server, reducing the amount of JavaScript sent to the client. This improves performance and user experience."
-      },
-      {
-        type: "code",
-        language: "tsx",
-        code: `// app/page.tsx (Server Component)
-export default async function HomePage() {
-  const data = await fetch('https://api.example.com/posts');
-  const posts = await data.json();
+// ── Utilities ──────────────────────────────────────────────────────────────
 
-  return (
-    <div>
-      {posts.map(post => (
-        <PostCard key={post.id} post={post} />
-      ))}
-    </div>
-  );
-}`
-      },
-      {
-        type: "heading",
-        text: "2. Optimize Re-renders with useMemo and useCallback"
-      },
-      {
-        type: "paragraph",
-        text: "Unnecessary re-renders can slow down your application. Use React's built-in hooks to optimize performance."
-      },
-      {
-        type: "code",
-        language: "tsx",
-        code: `import { useMemo, useCallback } from 'react';
-
-function ExpensiveComponent({ data, onItemClick }) {
-  const processedData = useMemo(() => {
-    return data.map(item => ({
-      ...item,
-      computed: expensiveCalculation(item)
-    }));
-  }, [data]);
-
-  const handleClick = useCallback((id) => {
-    onItemClick(id);
-  }, [onItemClick]);
-
-  return (
-    <ul>
-      {processedData.map(item => (
-        <li key={item.id} onClick={() => handleClick(item.id)}>
-          {item.computed}
-        </li>
-      ))}
-    </ul>
-  );
-}`
-      },
-      {
-        type: "heading",
-        text: "3. Embrace TypeScript for Type Safety"
-      },
-      {
-        type: "paragraph",
-        text: "TypeScript helps catch errors early and improves code maintainability. Define proper types for your components and props."
-      },
-      {
-        type: "code",
-        language: "tsx",
-        code: `interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'user' | 'guest';
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
-interface UserCardProps {
-  user: User;
-  onEdit?: (userId: string) => void;
+function childrenToText(children: ReactNode): string {
+  if (typeof children === "string") return children;
+  if (Array.isArray(children)) return children.map(childrenToText).join("");
+  if (
+    typeof children === "object" &&
+    children !== null &&
+    "props" in (children as { props?: { children?: ReactNode } })
+  ) {
+    return childrenToText(
+      (children as { props: { children?: ReactNode } }).props.children
+    );
+  }
+  return "";
 }
 
-export function UserCard({ user, onEdit }: UserCardProps) {
-  return (
-    <div className="user-card">
-      <h3>{user.name}</h3>
-      <p>{user.email}</p>
-      {onEdit && (
-        <button onClick={() => onEdit(user.id)}>
-          Edit
-        </button>
-      )}
-    </div>
-  );
-}`
-      }
-    ]
-  },
-  {
-    id: "typescript-advanced-patterns",
-    title: "Advanced TypeScript Patterns",
-    date: "April 15, 2026",
-    readTime: "10 min read",
-    category: "TypeScript",
-    image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800",
-    content: [
-      {
-        type: "paragraph",
-        text: "TypeScript offers powerful features that go beyond basic type annotations. Let's explore some advanced patterns that will make your code more robust and maintainable."
-      },
-      {
-        type: "heading",
-        text: "Discriminated Unions"
-      },
-      {
-        type: "paragraph",
-        text: "Discriminated unions allow you to create type-safe state machines and handle different cases explicitly."
-      },
-      {
-        type: "code",
-        language: "typescript",
-        code: `type LoadingState = {
-  status: 'loading';
-};
+type TocItem = { level: 1 | 2; text: string; id: string };
 
-type SuccessState<T> = {
-  status: 'success';
-  data: T;
-};
+function extractHeadings(markdown: string): TocItem[] {
+  const items: TocItem[] = [];
+  const seenIds = new Map<string, number>();
+  let inCodeBlock = false;
 
-type ErrorState = {
-  status: 'error';
-  error: string;
-};
+  for (const line of markdown.split("\n")) {
+    // Track fenced code block boundaries so we never treat # inside code as a heading
+    if (line.trimStart().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
 
-type AsyncState<T> = LoadingState | SuccessState<T> | ErrorState;
+    const match = line.match(/^(#{1,2})\s+(.+)$/);
+    if (!match) continue;
 
-function handleState<T>(state: AsyncState<T>) {
-  switch (state.status) {
-    case 'loading':
-      return 'Loading...';
-    case 'success':
-      return state.data;
-    case 'error':
-      return state.error;
+    const level = match[1].length as 1 | 2;
+    const rawText = match[2]
+      .replace(/\*\*/g, "")
+      .replace(/\*/g, "")
+      .replace(/`/g, "")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .trim();
+    const baseId = slugify(rawText);
+    if (!baseId) continue;
+
+    // Deduplicate IDs: append -2, -3 … for any collisions that remain
+    const count = seenIds.get(baseId) ?? 0;
+    seenIds.set(baseId, count + 1);
+    const id = count === 0 ? baseId : `${baseId}-${count + 1}`;
+
+    items.push({ level, text: rawText, id });
   }
-}`
-      }
-    ]
-  },
-  {
-    id: "tailwind-css-tips",
-    title: "Tailwind CSS Tips and Tricks",
-    date: "April 10, 2026",
-    readTime: "6 min read",
-    category: "CSS",
-    image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800",
-    content: [
-      {
-        type: "paragraph",
-        text: "Tailwind CSS has become the go-to utility-first CSS framework. Here are some tips to boost your productivity and create better designs."
-      },
-      {
-        type: "heading",
-        text: "Custom Utilities with @layer"
-      },
-      {
-        type: "paragraph",
-        text: "Create your own utility classes that work seamlessly with Tailwind's system."
-      },
-      {
-        type: "code",
-        language: "css",
-        code: `@layer utilities {
-  .text-shadow {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  }
+  return items;
+}
 
-  .glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-}`
-      }
-    ]
-  }
-];
+// ── CodeBlock ──────────────────────────────────────────────────────────────
 
 function CodeBlock({ code, language }: { code: string; language: string }) {
   const [copied, setCopied] = useState(false);
@@ -220,27 +88,41 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
   };
 
   return (
-    <div className="relative group rounded-xl overflow-hidden my-6">
-      <button
-        onClick={handleCopy}
-        className="absolute top-3 right-3 p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors z-10 opacity-0 group-hover:opacity-100"
-        aria-label="Copy code"
-      >
-        {copied ? (
-          <Check size={16} className="text-green-400" />
-        ) : (
-          <Copy size={16} className="text-gray-300" />
-        )}
-      </button>
+    <div className="relative rounded-xl overflow-hidden my-8">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#1a1a2e] border-b border-white/10">
+        <span className="text-xs text-gray-400 font-mono">{language}</span>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-400 hover:text-gray-100 transition-colors rounded"
+          aria-label="Copy code"
+        >
+          {copied ? (
+            <>
+              <Check size={13} className="text-green-400" />
+              <span className="text-green-400">Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy size={13} />
+              <span>Copy</span>
+            </>
+          )}
+        </button>
+      </div>
       <SyntaxHighlighter
         language={language}
         style={vscDarkPlus}
         customStyle={{
           margin: 0,
-          padding: '1.5rem',
-          fontSize: '0.875rem',
-          lineHeight: '1.5',
-          borderRadius: '0.75rem'
+          padding: "1.5rem",
+          fontSize: "0.85rem",
+          lineHeight: "1.7",
+          borderRadius: "0 0 0.75rem 0.75rem",
+          background: "#0d0d1a",
+          fontFamily: "'Anthropic Mono', 'Courier New', monospace",
+        }}
+        codeTagProps={{
+          style: { fontFamily: "'Anthropic Mono', 'Courier New', monospace" },
         }}
       >
         {code}
@@ -249,15 +131,228 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
   );
 }
 
+// ── Markdown component map ─────────────────────────────────────────────────
+
+const mdComponents: Components = {
+  h1: ({ children }) => {
+    const id = slugify(childrenToText(children));
+    return (
+      <h1
+        id={id}
+        className="font-serif scroll-mt-28 text-3xl md:text-4xl font-bold text-foreground mt-16 mb-6 leading-tight border-b border-border pb-4"
+      >
+        {children}
+      </h1>
+    );
+  },
+  h2: ({ children }) => {
+    const id = slugify(childrenToText(children));
+    return (
+      <h2
+        id={id}
+        className="font-serif scroll-mt-28 text-2xl md:text-3xl font-bold text-foreground mt-14 mb-5 leading-tight"
+      >
+        {children}
+      </h2>
+    );
+  },
+  h3: ({ children }) => {
+    const id = slugify(childrenToText(children));
+    return (
+      <h3
+        id={id}
+        className="font-serif scroll-mt-28 text-xl md:text-2xl font-semibold text-purple-600 dark:text-purple-300 mt-10 mb-4 leading-snug"
+      >
+        {children}
+      </h3>
+    );
+  },
+  h4: ({ children }) => (
+    <h4 className="font-serif scroll-mt-28 text-lg font-semibold text-foreground/90 mt-8 mb-3 leading-snug">
+      {children}
+    </h4>
+  ),
+  p: ({ children }) => (
+    <p className="font-serif text-muted-foreground leading-8 mb-6 text-[1.05rem]">{children}</p>
+  ),
+  hr: () => (
+    <hr className="my-12 border-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
+  ),
+  strong: ({ children }) => (
+    <strong className="font-semibold text-foreground">{children}</strong>
+  ),
+  em: ({ children }) => (
+    <em className="italic text-foreground/80">{children}</em>
+  ),
+  ul: ({ children }) => (
+    <ul className="my-5 pl-6 space-y-2 list-disc marker:text-purple-500">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="my-5 pl-6 space-y-2 list-decimal marker:text-purple-400 marker:font-semibold">
+      {children}
+    </ol>
+  ),
+  li: ({ children }) => (
+    <li className="font-serif text-muted-foreground leading-7 text-[1.02rem] pl-1">{children}</li>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="my-6 pl-5 border-l-4 border-purple-500 bg-purple-500/5 rounded-r-lg py-4 pr-4">
+      <div className="font-serif text-muted-foreground italic leading-7">{children}</div>
+    </blockquote>
+  ),
+  table: ({ children }) => (
+    <div className="my-8 overflow-x-auto rounded-xl border border-border">
+      <table className="w-full text-sm">{children}</table>
+    </div>
+  ),
+  thead: ({ children }) => (
+    <thead className="bg-purple-500/10">{children}</thead>
+  ),
+  tbody: ({ children }) => (
+    <tbody className="divide-y divide-border/50">{children}</tbody>
+  ),
+  tr: ({ children }) => (
+    <tr className="hover:bg-muted/30 transition-colors">{children}</tr>
+  ),
+  th: ({ children }) => (
+    <th className="px-5 py-3 text-left text-xs font-semibold text-purple-600 dark:text-purple-300 uppercase tracking-wider whitespace-nowrap">
+      {children}
+    </th>
+  ),
+  td: ({ children }) => (
+    <td className="px-5 py-3.5 text-muted-foreground leading-relaxed align-top">
+      {children}
+    </td>
+  ),
+  code: ({ className, children }) => {
+    const language = className?.replace("language-", "") || "text";
+    const code = String(children).replace(/\n$/, "");
+    if (!className) {
+      return (
+        <code className="px-1.5 py-0.5 rounded bg-muted text-purple-600 dark:text-purple-300 font-mono text-[0.85em]" style={{ fontFamily: "'Anthropic Mono', 'Courier New', monospace" }}>
+          {children}
+        </code>
+      );
+    }
+    return <CodeBlock code={code} language={language} />;
+  },
+  a: ({ href, children }) => (
+    <a
+      href={href}
+      className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 underline underline-offset-2 transition-colors"
+      target={href?.startsWith("http") ? "_blank" : undefined}
+      rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
+    >
+      {children}
+    </a>
+  ),
+};
+
+// ── Table of Contents ──────────────────────────────────────────────────────
+
+function TableOfContents({
+  items,
+  activeId,
+}: {
+  items: TocItem[];
+  activeId: string;
+}) {
+  return (
+    <nav aria-label="Table of contents">
+      <div className="flex items-center gap-2 mb-5 text-[0.7rem] font-semibold uppercase tracking-widest text-muted-foreground">
+        <BookOpen size={12} />
+        On this page
+      </div>
+
+      <ul className="space-y-0.5 border-l border-border">
+        {items.map((item, index) => {
+          const isActive = activeId === item.id;
+          return (
+            <li key={`${item.id}-${index}`}>
+              <a
+                href={`#${item.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document
+                    .getElementById(item.id)
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className={[
+                  "block py-1.5 pr-2 leading-snug transition-all duration-150",
+                  "border-l-2 -ml-px",
+                  item.level === 1
+                    ? "pl-4 text-[0.8rem] font-medium"
+                    : "pl-7 text-[0.75rem] font-normal",
+                  isActive
+                    ? "border-purple-500 text-purple-500 dark:text-purple-400"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground",
+                ].join(" ")}
+              >
+                {item.text}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────
+
 export function BlogDetailPage({ id }: { id: string }) {
-  const post = blogPostsData.find(p => p.id === id);
+  const post = blogPosts.find((p) => p.id === id);
+  const [markdownContent, setMarkdownContent] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string>("");
+
+  const tocItems = useMemo(
+    () => (markdownContent ? extractHeadings(markdownContent) : []),
+    [markdownContent]
+  );
+
+  useEffect(() => {
+    if (!post?.markdownPath) {
+      setMarkdownContent(null);
+      return;
+    }
+    fetch(post.markdownPath)
+      .then((r) => r.text())
+      .then(setMarkdownContent)
+      .catch(() => setMarkdownContent(null));
+  }, [post?.markdownPath]);
+
+  // Scroll spy — highlight whichever H1/H2 was most recently scrolled past
+  useEffect(() => {
+    if (!markdownContent) return;
+
+    const handleScroll = () => {
+      const headings = document.querySelectorAll(
+        "#blog-content h1, #blog-content h2"
+      );
+      let current = "";
+      headings.forEach((el) => {
+        if (el.getBoundingClientRect().top <= 130) current = el.id;
+      });
+      setActiveId(current);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Initialise after content renders
+    const timer = setTimeout(handleScroll, 150);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timer);
+    };
+  }, [markdownContent]);
 
   if (!post) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="text-center">
-          <h1 className="text-4xl mb-4 text-white" style={{ fontWeight: 700 }}>Post Not Found</h1>
-          <Link href="/#blog" className="text-purple-500 hover:text-purple-400">
+          <h1 className="text-4xl mb-4 text-foreground font-bold">Post Not Found</h1>
+          <Link href="/#blog" className="text-purple-600 hover:text-purple-500 dark:text-purple-500 dark:hover:text-purple-400">
             ← Back to Blog
           </Link>
         </div>
@@ -265,40 +360,60 @@ export function BlogDetailPage({ id }: { id: string }) {
     );
   }
 
+  const hasToc = tocItems.length > 0;
+
   return (
-    <div className="py-32 px-6 md:px-12 lg:px-20">
+    <div className="py-32 px-6 md:px-10 lg:px-16">
+
+      {/* ── Fixed TOC — always visible on xl+ regardless of scroll position ── */}
+      {hasToc && (
+        <nav
+          className="hidden xl:block fixed top-28 left-4 z-20 overflow-y-auto"
+          style={{
+            width: "210px",
+            maxHeight: "calc(100vh - 8rem)",
+            scrollbarWidth: "thin",
+            scrollbarColor: "#3d3d5c transparent",
+          }}
+        >
+          <TableOfContents items={tocItems} activeId={activeId} />
+        </nav>
+      )}
+
+      {/* ── Single centered column ── */}
       <div className="max-w-[800px] mx-auto">
-        {/* Back Button */}
+
+        {/* Back link */}
         <Link
           href="/#blog"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-10 transition-colors text-sm"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
           Back to Blog
         </Link>
 
-        {/* Post Header */}
-        <div className="mb-8">
-          <span className="px-3 py-1 bg-purple-500/10 text-purple-400 rounded-full text-sm">
+        {/* Header — centered */}
+        <div className="mb-10 text-center">
+          <span className="px-3 py-1 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-full text-xs font-medium tracking-wide uppercase">
             {post.category}
           </span>
-          <h1 className="text-4xl md:text-5xl mt-4 mb-4 text-white" style={{ fontWeight: 700 }}>
+          <h1 className="text-4xl md:text-5xl font-bold mt-5 mb-5 text-foreground leading-tight">
             {post.title}
           </h1>
-          <div className="flex items-center gap-4 text-gray-400 text-sm">
-            <span className="flex items-center gap-1">
-              <Calendar size={16} />
+          <div className="flex items-center justify-center gap-5 text-muted-foreground text-sm">
+            <span className="flex items-center gap-1.5">
+              <Calendar size={15} />
               {post.date}
             </span>
-            <span className="flex items-center gap-1">
-              <Clock size={16} />
+            <span className="flex items-center gap-1.5">
+              <Clock size={15} />
               {post.readTime}
             </span>
           </div>
         </div>
 
-        {/* Featured Image */}
-        <div className="rounded-2xl overflow-hidden mb-12">
+        {/* Hero image */}
+        <div className="rounded-2xl overflow-hidden mb-14">
           <img
             src={post.image}
             alt={post.title}
@@ -306,45 +421,58 @@ export function BlogDetailPage({ id }: { id: string }) {
           />
         </div>
 
-        {/* Post Content */}
-        <article className="prose prose-invert max-w-none">
-          {post.content.map((block, index) => {
-            if (block.type === 'paragraph') {
-              return (
-                <p key={index} className="text-gray-300 leading-relaxed mb-6 text-lg">
-                  {block.text}
-                </p>
-              );
-            }
-            if (block.type === 'heading') {
-              return (
-                <h2 key={index} className="text-2xl md:text-3xl mt-12 mb-4 text-white" style={{ fontWeight: 700 }}>
-                  {block.text}
-                </h2>
-              );
-            }
-            if (block.type === 'code') {
-              if (!block.code || !block.language) {
-                return null;
+        {/* Article */}
+        <article id="blog-content">
+          {markdownContent ? (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={mdComponents}
+            >
+              {markdownContent}
+            </ReactMarkdown>
+          ) : (
+            post.content?.map((block, index) => {
+              if (block.type === "paragraph") {
+                return (
+                  <p
+                    key={index}
+                    className="text-muted-foreground leading-8 mb-6 text-[1.05rem]"
+                  >
+                    {block.text}
+                  </p>
+                );
               }
-              return (
-                <CodeBlock
-                  key={index}
-                  code={block.code}
-                  language={block.language}
-                />
-              );
-            }
-            return null;
-          })}
+              if (block.type === "heading") {
+                return (
+                  <h2
+                    key={index}
+                      className="text-2xl md:text-3xl font-bold mt-14 mb-5 text-foreground leading-tight"
+                  >
+                    {block.text}
+                  </h2>
+                );
+              }
+              if (block.type === "code") {
+                if (!block.code || !block.language) return null;
+                return (
+                  <CodeBlock
+                    key={index}
+                    code={block.code}
+                    language={block.language}
+                  />
+                );
+              }
+              return null;
+            })
+          )}
         </article>
 
-        {/* Share Section */}
-        <div className="mt-16 pt-8 border-t border-gray-800">
-          <p className="text-gray-400 text-center">
+        <div className="mt-20 pt-8 border-t border-border text-center">
+          <p className="text-muted-foreground text-sm">
             Thanks for reading! Share this article if you found it helpful.
           </p>
         </div>
+
       </div>
     </div>
   );

@@ -1,37 +1,8 @@
 import Link from "next/link";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
+import { blogPosts } from "../data/blogPosts";
 
 export function Blog() {
-  const blogPosts = [
-    {
-      id: "react-best-practices-2026",
-      title: "React Best Practices for 2026",
-      excerpt: "Explore the latest patterns and practices for building scalable React applications in 2026.",
-      date: "April 20, 2026",
-      readTime: "8 min read",
-      category: "React",
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800"
-    },
-    {
-      id: "typescript-advanced-patterns",
-      title: "Advanced TypeScript Patterns",
-      excerpt: "Deep dive into advanced TypeScript patterns that will make your code more type-safe and maintainable.",
-      date: "April 15, 2026",
-      readTime: "10 min read",
-      category: "TypeScript",
-      image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800"
-    },
-    {
-      id: "tailwind-css-tips",
-      title: "Tailwind CSS Tips and Tricks",
-      excerpt: "Master Tailwind CSS with these productivity-boosting tips and custom configuration techniques.",
-      date: "April 10, 2026",
-      readTime: "6 min read",
-      category: "CSS",
-      image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800"
-    }
-  ];
-
   return (
     <section id="blog" className="py-20 px-6 md:px-12 lg:px-20 bg-secondary">
       <div className="max-w-[1400px] mx-auto">

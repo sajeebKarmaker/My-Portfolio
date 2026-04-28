@@ -37,7 +37,7 @@ export function Projects() {
               projects
             </span>
           </h2>
-          <button className="hidden md:flex items-center gap-2 text-white hover:text-purple-500 transition-colors" style={{ fontWeight: 700 }}>
+          <button className="hidden md:flex items-center gap-2 text-foreground hover:text-purple-500 transition-colors" style={{ fontWeight: 700 }}>
             View all <ArrowRight size={20} />
           </button>
         </div>

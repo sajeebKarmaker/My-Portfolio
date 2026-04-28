@@ -1,35 +1,6 @@
 import Link from "next/link";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
-
-const blogPosts = [
-  {
-    id: "react-best-practices-2026",
-    title: "React Best Practices for 2026",
-    excerpt: "Explore the latest patterns and practices for building scalable React applications in 2026.",
-    date: "April 20, 2026",
-    readTime: "8 min read",
-    category: "React",
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800"
-  },
-  {
-    id: "typescript-advanced-patterns",
-    title: "Advanced TypeScript Patterns",
-    excerpt: "Deep dive into advanced TypeScript patterns that will make your code more type-safe and maintainable.",
-    date: "April 15, 2026",
-    readTime: "10 min read",
-    category: "TypeScript",
-    image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800"
-  },
-  {
-    id: "tailwind-css-tips",
-    title: "Tailwind CSS Tips and Tricks",
-    excerpt: "Master Tailwind CSS with these productivity-boosting tips and custom configuration techniques.",
-    date: "April 10, 2026",
-    readTime: "6 min read",
-    category: "CSS",
-    image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800"
-  }
-];
+import { blogPosts } from "../data/blogPosts";
 
 export function BlogPage() {
   return (
@@ -37,10 +8,10 @@ export function BlogPage() {
       <div className="max-w-[1200px] mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl mb-4 text-white" style={{ fontWeight: 700 }}>
+          <h1 className="text-4xl md:text-5xl mb-4 text-foreground" style={{ fontWeight: 700 }}>
             Blog
           </h1>
-          <p className="text-xl text-gray-400">
+          <p className="text-xl text-muted-foreground">
             Thoughts on web development, design, and technology
           </p>
         </div>
@@ -51,7 +22,7 @@ export function BlogPage() {
             <Link
               key={post.id}
               href={`/blog/${post.id}`}
-              className="group bg-[#12121a] rounded-2xl overflow-hidden border border-gray-800 hover:border-purple-500/50 transition-all"
+              className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-purple-500/50 transition-all"
             >
               <div className="h-48 overflow-hidden">
                 <img
@@ -61,8 +32,8 @@ export function BlogPage() {
                 />
               </div>
               <div className="p-6">
-                <div className="flex items-center gap-4 mb-3 text-sm text-gray-400">
-                  <span className="px-3 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs">
+                <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
+                  <span className="px-3 py-1 bg-purple-500/10 text-purple-500 rounded-full text-xs">
                     {post.category}
                   </span>
                   <span className="flex items-center gap-1">
@@ -70,16 +41,16 @@ export function BlogPage() {
                     {post.date}
                   </span>
                 </div>
-                <h2 className="text-xl mb-2 text-white group-hover:text-purple-400 transition-colors" style={{ fontWeight: 700 }}>
+                <h2 className="text-xl mb-2 text-foreground group-hover:text-purple-500 transition-colors" style={{ fontWeight: 700 }}>
                   {post.title}
                 </h2>
-                <p className="text-gray-400 mb-4 text-sm leading-relaxed">{post.excerpt}</p>
+                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">{post.excerpt}</p>
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1 text-sm text-gray-500">
+                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Clock size={14} />
                     {post.readTime}
                   </span>
-                  <span className="flex items-center gap-1 text-purple-400 text-sm">
+                  <span className="flex items-center gap-1 text-purple-500 text-sm">
                     Read more <ArrowRight size={14} />
                   </span>
                 </div>

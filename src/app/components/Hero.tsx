@@ -8,28 +8,28 @@ export function Hero() {
         <div className="space-y-6">
           <div className="space-y-4">
             <h1 className="text-5xl md:text-6xl lg:text-7xl leading-tight" style={{ fontWeight: 700 }}>
-              <span className="text-white">CREATIVE</span>
+              <span className="text-foreground">FULL STACK</span>
               <br />
               <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
-                FRONTEND
+                SOFTWARE
               </span>
               <br />
-              <span className="text-white">DEVELOPER &</span>
+              <span className="text-foreground">DEVELOPER &</span>
               <br />
-              <span className="text-white">UI DESIGNER</span>
+              <span className="text-foreground">PROBLEM SOLVER</span>
             </h1>
           </div>
 
-          <p className="text-gray-400 text-base md:text-lg max-w-xl leading-relaxed">
-            I'm a passionate frontend developer and UI designer dedicated to crafting
-            beautiful, functional, and user-centered digital experiences. With expertise
-            in modern web technologies and design principles, I bring ideas to life through
-            clean code and stunning interfaces.
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl leading-relaxed">
+            I'm a passionate full stack software developer dedicated to building
+            scalable, high-performance applications from database to UI. With expertise
+            across the entire stack, I turn complex ideas into clean, reliable, and
+            user-centered digital experiences.
           </p>
 
           <div className="flex items-center gap-4 pt-4">
             <a
-              href="https://github.com"
+              href="https://github.com/sajeebKarmaker"
               target="_blank"
               rel="noopener noreferrer"
               className="w-12 h-12 rounded-full bg-gray-800 hover:bg-purple-500 flex items-center justify-center transition-colors"
@@ -38,7 +38,7 @@ export function Hero() {
               <Github size={20} className="text-white" />
             </a>
             <a
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/in/saanto/"
               target="_blank"
               rel="noopener noreferrer"
               className="w-12 h-12 rounded-full bg-gray-800 hover:bg-purple-500 flex items-center justify-center transition-colors"
