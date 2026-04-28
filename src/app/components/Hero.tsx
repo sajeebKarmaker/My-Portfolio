@@ -67,7 +67,7 @@ export function Hero() {
             {/* Profile image */}
             <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-purple-500/30">
               <img
-                src="https://images.unsplash.com/photo-1600896997793-b8ed3459a17f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBkZXZlbG9wZXIlMjBwb3J0cmFpdCUyMGhlYWRzaG90fGVufDF8fHx8MTc3NzEyNzU1NXww&ixlib=rb-4.1.0&q=80&w=1080"
+                src="https://i.imgur.com/0QLBZya.jpeg"
                 alt="Profile"
                 className="w-full h-full object-cover"
               />

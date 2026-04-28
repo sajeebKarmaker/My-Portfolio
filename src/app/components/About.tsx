@@ -26,7 +26,7 @@ export function About() {
           </div>
           <div className="rounded-2xl overflow-hidden h-80">
             <img
-              src="https://images.unsplash.com/photo-1600896997793-b8ed3459a17f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBkZXZlbG9wZXIlMjBwb3J0cmFpdCUyMGhlYWRzaG90fGVufDF8fHx8MTc3NzEyNzU1NXww&ixlib=rb-4.1.0&q=80&w=1080"
+              src="https://i.imgur.com/0QLBZya.jpeg"
               alt="Portrait"
               className="w-full h-full object-cover"
             />

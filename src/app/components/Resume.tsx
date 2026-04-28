@@ -3,38 +3,27 @@ import { GraduationCap, Briefcase } from "lucide-react";
 export function Resume() {
   const education = [
     {
-      degree: "Bachelor of Science in Computer Science",
-      institution: "University of Technology",
-      period: "2018 - 2022",
-      description: "Focused on software engineering, web development, and UI/UX design principles."
-    },
-    {
-      degree: "Frontend Development Certification",
-      institution: "Tech Academy",
-      period: "2022",
-      description: "Advanced certification in React, TypeScript, and modern frontend frameworks."
+      degree: "Bachelor of Science in Electrical  & Computer Engineering",
+      institution: "Rajshahi University of Engineering & Technology",
+      period: "2019 - 2024",
+      description: "Focused on software engineering, web development, and competitive programming."
     }
   ];
 
   const experience = [
     {
-      title: "Senior Frontend Developer",
-      company: "Tech Solutions Inc.",
-      period: "2023 - Present",
-      description: "Leading frontend development for enterprise applications, mentoring junior developers."
+      title: "Software Engineer - L2",
+      company: "Enosis Solutions",
+      period: "2026 - Present",
+      description: "Working on various projects and learning new technologies."
     },
     {
-      title: "Frontend Developer",
-      company: "Creative Agency",
-      period: "2022 - 2023",
-      description: "Built responsive web applications and collaborated with design teams."
+      title: "Software Engineer - L1",
+      company: "Enosis Solutions",
+      period: "2025 - 2026",
+      description: "Working on various projects and learning new technologies."
     },
-    {
-      title: "Junior Developer",
-      company: "Startup Labs",
-      period: "2021 - 2022",
-      description: "Contributed to various client projects and learned modern development practices."
-    }
+    
   ];
 
   return (
